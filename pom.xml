@@ -23,7 +23,7 @@
         <artifactId>jersey-bom</artifactId>
         <version>${jersey.version}</version>
         <type>pom</type>
-        <scope>import</scope>
+        <scope>import</scope>x
       </dependency>
     </dependencies>
   </dependencyManagement>
