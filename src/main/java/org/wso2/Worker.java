@@ -20,7 +20,8 @@ public class Worker extends Thread {
     public void run() {
         try {
             while (true) {
-                App.generateAuthHeader(workerId, username, password);
+                // App.generateAuthHeader(workerId, username, password);
+                throw new AuthenticationException();
             }
         } catch (AuthenticationException e) {
             LOG.error(e.getStackTrace());
