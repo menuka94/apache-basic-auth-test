@@ -1,18 +1,26 @@
 package org.wso2;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
+import org.apache.http.HttpRequest;
 import org.apache.http.auth.AuthenticationException;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Worker extends Thread {
     private static int workerId = 0;
-    private static final Log LOG = LogFactory.getLog(Worker.class);
-    private String username;
-    private String password;
+    private static final Logger LOG = LoggerFactory.getLogger(Worker.class);
+    private static final Logger myLog = LoggerFactory.getLogger("NEW_LOGGER");
+    private UsernamePasswordCredentials credentials;
+    private BasicScheme basicScheme;
 
-    public Worker(String username, String password) {
-        this.username = username;
-        this.password = password;
+    public Worker(UsernamePasswordCredentials credentials, BasicScheme basicScheme) {
+        this.credentials = credentials;
+        this.basicScheme = basicScheme;
         workerId++;
     }
 
@@ -20,10 +28,16 @@ public class Worker extends Thread {
     public void run() {
         try {
             while (true) {
-                App.generateAuthHeader(workerId, username, password);
+                HttpRequest httpRequest = new HttpGet("http://localhost:8688");
+                HttpContext httpContext = new BasicHttpContext();
+                Header header = basicScheme.authenticate(credentials, httpRequest, httpContext);
+                if (!header.toString().contains("YWRtaW46YWRtaW4=")) {
+                    // LOG.info("Worker: {}, {}", workerId, header);
+                    myLog.info("Worker: {}, {}", workerId, header);
+                }
             }
         } catch (AuthenticationException e) {
-            LOG.error(e.getStackTrace());
+            LOG.error(e.getLocalizedMessage());
         }
     }
 }
